@@ -34,7 +34,16 @@ To comply data publication policy of Twitter, we cannot share the raw data. Inst
    * **2. history:** Four basic statistics calculated from past tweet labels of the same user;
    * **3. embedding:** 128-dimensional user representation in the reply network.
 
-## 2. Results
+## 2. Tests
+
+After downloading the data, you can test your setup by executing the provided tests:
+
+```bash
+cd tests
+pytest --cov
+```
+
+## 3. Results
 
 We present our experimental results in a [jupyter notebook](ipython/VaxxerModelResults.ipynb)
 

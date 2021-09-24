@@ -2,6 +2,8 @@
 
 [Ferenc Béres](https://github.com/ferencberes), [Rita Csoma](https://github.com/csomarita), [Tamás Vilmos Michaletzky](https://github.com/tmichaletzky), and [András A. Benczúr](https://mi.nemzetilabor.hu/people/andras-benczur)
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/covid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb)
+
 In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection
 models.
 
@@ -53,6 +55,5 @@ This repository is still under development. In the upcoming weeks, we will provi
 - scripts to download the raw data from Twitter
 - scripts to clean and preprocess raw data
 - scripts for training node embedding models
-- detailed documentation
 - CI with GitHub Actions
 - detailed documentation

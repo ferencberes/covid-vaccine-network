@@ -1,0 +1,39 @@
+name: CI
+
+on:
+
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+    build:
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [ubuntu-latest]
+          python-version: ['3.6']
+      steps:
+      - uses: actions/checkout@v2
+      - uses: codecov/codecov-action@v2
+      - name: Setup conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          update-conda: true
+          python-version: ${{ matrix.python-version }}
+          conda-channels: anaconda, conda-forge
+      - run: conda --version
+      - run: which python
+      - name: Run installation.
+        run: |
+         pip install -r requirements.txt
+      - name: Download data
+        run: |
+         ./scripts/download_data.sh
+      - name: Run tests
+        run: |
+         cd tests
+         pytest --cov

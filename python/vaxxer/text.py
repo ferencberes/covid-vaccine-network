@@ -1,4 +1,5 @@
-import re, unicodedata, contractions, emoji, inflect
+import re, unicodedata, contractions, emoji, inflect, nltk
+nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords

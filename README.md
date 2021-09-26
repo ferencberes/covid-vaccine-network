@@ -1,8 +1,11 @@
 # Vaccine skepticism detection by network embedding
 
+![build](https://github.com/ferencberes/covid-vaccine-network/actions/workflows/main.yml/badge.svg)
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/cid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb)
+
 [Ferenc Béres](https://github.com/ferencberes), [Rita Csoma](https://github.com/csomarita), [Tamás Vilmos Michaletzky](https://github.com/tmichaletzky), and [András A. Benczúr](https://mi.nemzetilabor.hu/people/andras-benczur)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/covid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb)
 
 In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection
 models.

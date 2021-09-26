@@ -1,5 +1,6 @@
 import re, unicodedata, contractions, emoji, inflect, nltk
 nltk.download('punkt')
+nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords

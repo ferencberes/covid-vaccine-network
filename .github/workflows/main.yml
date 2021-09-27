@@ -34,8 +34,8 @@ jobs:
          ./scripts/download_data.sh
       - name: Run tests
         run: |
-         cd tests
          pytest --cov
+         #pytest --cov=python --cov-report=html
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v2
         with:

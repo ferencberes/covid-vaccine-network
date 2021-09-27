@@ -2,6 +2,7 @@
 
 ![build](https://github.com/ferencberes/covid-vaccine-network/actions/workflows/main.yml/badge.svg)
 [![codecov](https://codecov.io/gh/ferencberes/covid-vaccine-network/branch/main/graph/badge.svg?token=B2D3JHO2K3)](https://codecov.io/gh/ferencberes/covid-vaccine-network)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/cid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb)
 
 [Ferenc Béres](https://github.com/ferencberes), [Rita Csoma](https://github.com/csomarita), [Tamás Vilmos Michaletzky](https://github.com/tmichaletzky), and [András A. Benczúr](https://mi.nemzetilabor.hu/people/andras-benczur)
@@ -12,8 +13,8 @@ models.
 
 # Requirements
 
-- Python 3.6 environment
-- Install all dependencies with the following command:
+- UNIX environment
+- Install Python dependencies with the following command:
 
 ```bash
 pip install -r requirements.txt
@@ -44,19 +45,18 @@ To comply data publication policy of Twitter, we cannot share the raw data. Inst
 After downloading the data, you can test your setup by executing the provided tests:
 
 ```bash
-cd tests
 pytest --cov
 ```
 
 ## 3. Results
 
 We present our experimental results in a [jupyter notebook](ipython/VaxxerModelResults.ipynb)
+You can run this notebook with [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/cid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb).
 
 # What's coming to this repository?
 
-This repository is still under development. In the upcoming weeks, we will provide:
+This repository is still under development. In the upcoming weeks, we will publish:
 - scripts to download the raw data from Twitter
 - scripts to clean and preprocess raw data
 - scripts for training node embedding models
-- CI with GitHub Actions
 - detailed documentation

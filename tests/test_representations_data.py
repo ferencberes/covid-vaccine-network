@@ -1,10 +1,12 @@
 import sys, os
 import numpy as np
-sys.path.insert(0, '../python')
+script_path = os.path.realpath(__file__)
+script_dir = os.path.split(script_path)[0]
+sys.path.insert(0, '%s/../python' % script_dir)
 from vaxxer.models import VaxxerClassifier
 from sklearn.metrics import roc_auc_score
 
-prepared_data_dir = "../data/covid_vaxxer_representations/"
+prepared_data_dir = "%s/../data/covid_vaxxer_representations/" % script_dir
 classifier = VaxxerClassifier("tfidf", "Vax-skeptic", True)
 config = {"model":"newton-cg"}
 

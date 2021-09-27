@@ -1,8 +1,10 @@
 import sys, os, shutil
-sys.path.insert(0, '../python')
+script_path = os.path.realpath(__file__)
+script_dir = os.path.split(script_path)[0]
+sys.path.insert(0, '%s/../python' % script_dir)
 from vaxxer.models import VaxxerModel, VaxxerClassifier
 
-data_dir = "sample_data"
+data_dir = "%s/sample_data" % script_dir
 seed_fp = os.path.join(data_dir, "seed_preprocessed", "valid_thread_seeds.csv")
 model_dir = os.path.join(data_dir, "seed_labeled")
 comet_key = None

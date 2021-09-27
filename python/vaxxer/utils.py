@@ -289,33 +289,12 @@ def calculate_sequential_stats(df, id_col, user_col, value_cols=None, aggregatio
         agg_df = pd.concat([agg_df, tmp_df], axis=1)
     return agg_df
 
-def append_meta_cols(X, meta_df, cols):
-    df_with_ids = pd.concat([meta_df[cols], pd.DataFrame(X, index=meta_df.index)], axis=1)
-    if df_with_ids.isnull().sum().max() > 0:
-        raise RuntimeError("Missing values occured after concatenation!")
-    return df_with_ids
-
-def get_user_stats(df_with_ids, user_id="usr_id_str", record_id="id_str", agg_type="mean"):
-    user_df = df_with_ids.drop(record_id, axis=1).groupby(user_id).agg(agg_type).reset_index()
-    renamed_cols = ["%s_usr_%s" % (col, agg_type) if (col != user_id) and (col != record_id) else col for col in user_df.columns]
-    user_df.columns = renamed_cols
-    return user_df
-
 def get_twitter_stats(meta_df, record_id="id_str", cols=['usr_followers_count', 'usr_friends_count', 'usr_favourites_count', 'usr_statuses_count']):
     keep_cols = [record_id] + cols
     tmp_df = meta_df[keep_cols].copy()
     for col in cols:
         tmp_df[col] = np.log(1+tmp_df[col]).astype("int")
     return tmp_df
-    
-def merge_features_parts(parts, key_col):
-    merged_df = parts[0]
-    for idx in range(1, len(parts)):
-        common_cols = set(merged_df.columns).intersection(set(parts[idx]))
-        if len(common_cols) != 1:
-            raise RuntimeError("Number of common columns is %i" % len(common_cols))
-        merged_df = merged_df.merge(parts[idx], on=key_col, how="left")
-    return merged_df
 
 def load_node_embeddings(file_path, user_id="usr_id_str", users=None):
     node_emd_df = pd.read_csv(file_path, header=None)

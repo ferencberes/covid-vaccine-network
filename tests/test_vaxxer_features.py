@@ -16,10 +16,11 @@ def test_text_tfidf():
     model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1)
     parameters = [
         ("model", "fixed", 'newton-cg'),
-        ("dimension", "choice", [1,5])
+        ("dimension", "choice", [2,3]),
+        ("use_svd", "choice", [True,False])
     ]
-    best_config = model.tune_parameters(parameters, "GRID", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5, export_metrics=False)
-    assert "dimension" in best_config and not "model" in best_config and len(model.components) == 1
+    best_config = model.tune_parameters(parameters, "GRID", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
+    assert "dimension" in best_config and "use_svd" in best_config and not "model" in best_config and len(model.components) == 1
     
 def test_text_word2vec():
     model = VaxxerModel(seed_fp, model_dir, "word2vec", "Vax-skeptic", False, comet_key, workers=1)
@@ -30,7 +31,7 @@ def test_text_word2vec():
         ("min_count", "fixed", 1),
         ("epochs", "int", [1,3]),
     ]
-    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5, export_metrics=False)
+    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
     assert "epochs" in best_config and not "dimension" in best_config and len(model.components) == 1
 
 def test_text_doc2vec():
@@ -42,7 +43,7 @@ def test_text_doc2vec():
         ("min_count", "fixed", 1),
         ("epochs", "int", [1,3]), 
     ]
-    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5, export_metrics=False)
+    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
     assert "epochs" in best_config and not "dimension" in best_config and len(model.components) == 1
     
 ### models with user statistics ###

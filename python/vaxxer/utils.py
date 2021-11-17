@@ -15,10 +15,15 @@ def original_data(thread_fp, nrows=None):
     # converting id fields from string to int
     thread_df['id_str'] = thread_df['id_str'].astype(int)
     thread_df['usr_id_str'] = thread_df['usr_id_str'].astype(int)
-    thread_df['conversation_id'] = thread_df['conversation_id'].astype(int)
+    if 'conversation_id' in thread_df.columns:
+        thread_df['conversation_id'] = thread_df['conversation_id'].astype(int)
     # filtering the dataframe to only contain english language tweets
-    thread_df = thread_df[thread_df.lang == "en"]
-    seed_df = thread_df[thread_df["is_conv_seed"]]
+    if 'lang' in thread_df.columns:
+        thread_df = thread_df[thread_df["lang"] == "en"]
+    if 'is_conv_seed' in thread_df.columns:
+        seed_df = thread_df[thread_df["is_conv_seed"]]
+    else:
+        seed_df = None
     return thread_df, seed_df
 
 def labeled_data(label_fp):

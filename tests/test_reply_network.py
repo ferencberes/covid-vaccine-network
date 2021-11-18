@@ -29,7 +29,7 @@ def test_generate_embedding():
     assert emb_df.shape[1] == 10
     
 def test_all_embeddings():
-    preproc_graph_path = preprocess(data_dir, 1)
+    preproc_graph_path = preprocess(replies_fp, 1)
     for model in ["DeepWalk","NetMF","RandNE","SymmNMF","LaplacianEigenmaps","BigClam"]:
         output_fp, emb_df = fit(preproc_graph_path, model, 3)
         os.remove(output_fp)

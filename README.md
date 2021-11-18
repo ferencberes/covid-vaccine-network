@@ -58,6 +58,33 @@ pytest --cov
 We present our experimental results in a [jupyter notebook](ipython/VaxxerModelResults.ipynb)
 You can run this notebook with [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ferencberes/cid-vaccine-network/HEAD?filepath=ipython%2FVaxxerModelResults.ipynb).
 
+## 4. Node embedding
+
+We provide a script to train your own node embedding model on the Twitter reply graph.
+
+First, you need to preprocess the network. For example, in the command below we only use the first 100K edges and exclude nodes with less than 5 connections:
+```bash
+python ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 3 --rows 100000
+```
+
+Next, train a node embedding model (e.g. DeepWalk) on the preprocessed network. The input file (3core_100000.csv) was created in the previous step.
+```bash
+python ./scripts/node_embedding.py fit 3core_100000.csv --model DeepWalk
+```
+
+The 5-dimensional user representations are exported to a CSV file in your working directory. 
+```bash
+head -3 DeepWalk_dim5_2021-11-18_14\:00\:47.csv
+```
+
+The first column is the user identifier and the rest contains the representation for each node (Twitter user) of the reply network.
+```
+897201317223038976,-1.7705172,-2.9218996,3.7667134,-1.5700843,1.1719122
+1280867032347664384,-3.7421749,-4.201378,1.2413,-2.1019526,2.6107976
+1346645698176049152,-1.8614192,-3.9294648,1.6497265,-2.1258717,1.7651175
+```
+These user representations can be fed to the vaccine view classifier. However, training node embedding models on the whole Twitter reply network with millions of edges can take several days.
+
 # What's coming to this repository?
 
 This repository is still under development. In the upcoming weeks, we will publish:

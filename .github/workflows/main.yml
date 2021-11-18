@@ -15,7 +15,7 @@ jobs:
       strategy:
         matrix:
           os: [ubuntu-18.04, ubuntu-latest]
-          python-version: ['3.6','3.7','3.8','3.9','3.10']
+          python-version: ['3.6','3.7','3.8','3.9']
       steps:
       - uses: actions/checkout@v2
       - name: Setup conda
@@ -26,19 +26,20 @@ jobs:
           conda-channels: anaconda, conda-forge
       - run: conda --version
       - run: which python
-      - name: Run installation.
+      - name: "Run installation"
         run: |
          pip install -r requirements.txt
-      - name: Download data
+      - name: "Download data"
         run: |
          ./scripts/download_data.sh
-      - name: Run tests
+      - name: "Run tests"
         run: |
          pytest --cov=./
       - name: "Upload coverage to Codecov"
         run:
          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
-        #uses: codecov/codecov-action@v2
-        #with:
-        #  fail_ci_if_error: true
-        #  token: ${{ secrets.CODECOV_TOKEN }}
+      - name: "Node embedding"
+        run: |
+         ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 2 --rows 10000
+         python ./scripts/node_embedding.py fit 2core_10000.csv --model NetMF
+         wc -l NetMF*.csv

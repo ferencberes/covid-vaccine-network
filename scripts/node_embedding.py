@@ -13,19 +13,19 @@ def log(message, filename="node_embedding_logfile.txt"):
         file.write("\n")
         file.write(message)
 
-def preprocess(data_dir, min_connections, last_date=None, src_col="usr_id_str", trg_col="in_reply_to_user_id_str"):
-    # reading in data
-    thread_fp = os.path.join(data_dir, "seed_preprocessed", "valid_threads.csv")
+def preprocess(replies_fp, min_connections, nrows=None, src_col="usr_id_str", trg_col="in_reply_to_user_id_str"):
     start = time.time()
-    thread_df, _ = original_data(thread_fp)#, nrows=10000)
+    if nrows != None:
+        replies_df, _ = original_data(replies_fp, nrows=nrows)
+    else:
+        replies_df, _ = original_data(replies_fp)
     print("Data reading finished: %i second" % int(time.time()-start)) 
-    print("Dimensions:", thread_df.shape)
-    # node embedding preprocessing, leaving out records after the specified last_date
+    print("Dimensions:", replies_df.shape)
     start = time.time()
-    G = get_user_graph(thread_df, min_connections, last_date, src_col, trg_col, remove_loops=True)
+    G = get_user_graph(replies_df, min_connections, None, src_col, trg_col, remove_loops=True)
     print("User graph created: %i seconds" % int(time.time()-start))
     edges_df = nx.to_pandas_edgelist(G, source=src_col, target=trg_col)
-    fname = "%icore_%s.csv" % (min_connections, str(last_date))
+    fname = "%icore_%s.csv" % (min_connections, str(nrows))
     edges_df.to_csv(fname, index=False)
     return fname
     
@@ -46,15 +46,6 @@ def fit(preprocessed_path, embedding_id, dimension=128, output_dir=None, src_col
     df.to_csv(output_path, header=False, index=True)
     log(filename + "\t" + embedding_time)
     return output_path, df
-    
-def valid_date_type(arg_date_str):
-    """custom argparse *date* type for user dates values given from the command line"""
-    try:
-        arg_date = dt.datetime.strptime(arg_date_str, "%Y-%m-%d")
-        return arg_date.strftime('%Y-%m-%d')
-    except ValueError:
-        msg = "Given date ({0}) is not valid! Expected format, YYYY-MM-DD!".format(arg_date_str)
-        raise argparse.ArgumentTypeError(msg)
 
 # execute only if run as a script        
 if __name__ == "__main__":   
@@ -62,9 +53,9 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest="action", help="Select action to perform")
     subparsers.required = True
     preproc_parser = subparsers.add_parser("preprocess")
-    preproc_parser.add_argument("data_dir", type=str, help="Specify data directory")
-    preproc_parser.add_argument('--con', type=int, default=5, choices=range(2,11), metavar="[2-10]", help='minimum connection of nodes (2-10) (default: 5)')
-    preproc_parser.add_argument('--date', type=valid_date_type, default=None, metavar="2021-MM-DD", help='load data only before the specified date')
+    preproc_parser.add_argument("replies_path", type=str, help="Specify path for the reply network")
+    preproc_parser.add_argument('--con', type=int, default=3, choices=range(1,11), metavar="[1-10]", help='minimum connection of nodes (2-10) (default: 5)')
+    preproc_parser.add_argument('--rows', type=int, default=None, help='define the number of edges to load from the reply network file')
     fit_parser = subparsers.add_parser("fit")
     fit_parser.add_argument("preproc_path", type=str, help="Path for the preprocessed data")
     fit_parser.add_argument('--model', choices=EMBEDDINGS, type=str, default="RandNE", help='node embedding model (default: RandNE)')
@@ -74,6 +65,6 @@ if __name__ == "__main__":
     args_dict = vars(args)
     print(args_dict)
     if args.action == "preprocess":
-        _ = preprocess(args.data_dir, args.con, args.date)
+        _ = preprocess(args.replies_path, args.con, args.rows)
     else:
         _, _ = fit(args.preproc_path, args.model, args.dim, args.output_dir)

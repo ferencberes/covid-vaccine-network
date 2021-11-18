@@ -9,7 +9,7 @@
 
 
 In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection
-models.
+techniques.
 
 # Requirements
 
@@ -22,6 +22,17 @@ pip install -r requirements.txt
 
 # Usage
 
+If you use our code or the Twitter data set that we collected on Covid vaccination, please cite our preprint:
+```
+@misc{béres2021vaccine,
+      title={Vaccine skepticism detection by network embedding}, 
+      author={Ferenc Béres and Rita Csoma and Tamás Vilmos Michaletzky and András A. Benczúr},
+      year={2021},
+      eprint={2110.13619},
+      archivePrefix={arXiv},
+      primaryClass={cs.SI}
+}
+```
 
 ## 1. Data
 
@@ -74,7 +85,7 @@ python ./scripts/node_embedding.py fit 3core_100000.csv --model DeepWalk
 
 The 5-dimensional user representations are exported to a CSV file in your working directory. 
 ```bash
-head -3 DeepWalk_dim5_2021-11-18_14\:00\:47.csv
+head -3 DeepWalk_dim5_*.csv
 ```
 
 The first column is the user identifier and the rest contains the representation for each node (Twitter user) of the reply network.
@@ -84,6 +95,10 @@ The first column is the user identifier and the rest contains the representation
 1346645698176049152,-1.8614192,-3.9294648,1.6497265,-2.1258717,1.7651175
 ```
 These user representations can be fed to the vaccine view classifier. However, training node embedding models on the whole Twitter reply network with millions of edges can take several days.
+
+# Acknowledgements
+
+The research was supported by the Ministry of Innovation and Technology NRDI Office within the framework of the Artificial Intelligence National Laboratory Program and by Project 2018-1.2.1-NKP-00008: Exploring the Mathematical Foundations of Artificial Intelligence.
 
 # What's coming to this repository?
 

@@ -22,7 +22,20 @@ pip install -r requirements.txt
 
 # Usage
 
-## 1. Download train-test data
+
+## 1. Data
+
+To comply data publication policy of Twitter, we cannot share the raw data. Instead, we publish our data in two packages to provide reproducibility and encourage future work:
+
+- **[1. Twitter data identifiers](http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/tweet_ids_2021-11-18.zip):** contains only tweet ID and user ID for each collected tweet. We further publish the underlying reply graph that we used to fit node embedding and community detection methods. 
+
+- **[2. Tweet representations](http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/covid_vaxxer_representations_2021-09-24.zip):** In this package, we publish the data that we used for training and evaluating the vaccine view classifier. This model predicts the vaccine view (pro-vaxxer or vax-skeptic) for each tweet by incorporating three modalities:
+
+   * **1. text:** 1,000 dimensional TF-IDF vector of tweet text;
+   * **2. history:** Four basic statistics calculated from past tweet labels of the same user;
+   * **3. embedding:** 128-dimensional user representation learned by node embedding from the Twitter reply network.
+   
+## Download data
 
 We provide a bash script (`download_data.sh`) to download our Twitter data set related to COVID19 vaccine skepticism.
 
@@ -30,15 +43,7 @@ We provide a bash script (`download_data.sh`) to download our Twitter data set r
 ./scripts/download_data.sh
 ```
 
-To comply data publication policy of Twitter, we cannot share the raw data. Instead, we publish our data in two different packages to provide reproducibility and encourage future work:
-
-- **[Twitter data identifiers]():** contains only tweet ID and user ID for each collected tweet. We further publish the underlying reply graph that we used to fit node embedding and community detection methods. 
-
-- **[Tweet representations](http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/covid_vaxxer_representations_2021-09-24.zip):** In this package, we publish the data that we used for model training and evaluation. For tweet classification, we used the following three modalities with logistic regression:
-
-   * **1. text:** 1,000 dimensional TF-IDF vector of tweet text;
-   * **2. history:** Four basic statistics calculated from past tweet labels of the same user;
-   * **3. embedding:** 128-dimensional user representation in the reply network.
+Both packages are downloaded and decompressed into the `data` subfolder.
 
 ## 2. Tests
 
@@ -58,5 +63,4 @@ You can run this notebook with [![Binder](https://mybinder.org/badge_logo.svg)](
 This repository is still under development. In the upcoming weeks, we will publish:
 - scripts to download the raw data from Twitter
 - scripts to clean and preprocess raw data
-- scripts for training node embedding models
 - detailed documentation

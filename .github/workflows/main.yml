@@ -40,6 +40,6 @@ jobs:
          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - name: "Node embedding"
         run: |
-         ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 2 --rows 10000
+         python ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 2 --rows 10000
          python ./scripts/node_embedding.py fit 2core_10000.csv --model NetMF
          wc -l NetMF*.csv

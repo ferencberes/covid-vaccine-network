@@ -35,7 +35,7 @@ To comply data publication policy of Twitter, we cannot share the raw data. Inst
    * **2. history:** Four basic statistics calculated from past tweet labels of the same user;
    * **3. embedding:** 128-dimensional user representation learned by node embedding from the Twitter reply network.
    
-## Download data
+### Download data
 
 We provide a bash script (`download_data.sh`) to download our Twitter data set related to COVID19 vaccine skepticism.
 

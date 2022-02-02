@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 # Usage
 
-If you use our code or the Twitter data set that we collected on Covid vaccination, please cite paper:
+If you use our code or the Twitter data set that we collected on Covid vaccination, please cite our paper:
 
 ```
 @conference{béres2021vaccine,

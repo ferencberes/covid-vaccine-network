@@ -8,8 +8,9 @@
 [Ferenc Béres](https://github.com/ferencberes), [Rita Csoma](https://github.com/csomarita), [Tamás Vilmos Michaletzky](https://github.com/tmichaletzky), and [András A. Benczúr](https://mi.nemzetilabor.hu/people/andras-benczur)
 
 
-In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection
-techniques.
+In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection techniques. 
+
+Our work was published at 10th International Conference on Complex Networks and Their Applications.
 
 # Requirements
 
@@ -22,17 +23,16 @@ pip install -r requirements.txt
 
 # Usage
 
-If you use our code or the Twitter data set that we collected on Covid vaccination, please cite our preprint:
-```
-@misc{béres2021vaccine,
-      title={Vaccine skepticism detection by network embedding}, 
-      author={Ferenc Béres and Rita Csoma and Tamás Vilmos Michaletzky and András A. Benczúr},
-      year={2021},
-      eprint={2110.13619},
-      archivePrefix={arXiv},
-      primaryClass={cs.SI}
+If you use our code or the Twitter data set that we collected on Covid vaccination, please cite paper:
+
+@conference{béres2021vaccine,
+  author       = {Ferenc Béres and Rita Csoma and Tamás Vilmos Michaletzky and András A. Benczúr}, 
+  title        = {Vaccine skepticism detection by network embedding},
+  booktitle    = {Book of Abstracts of the 10th International Conference on Complex Networks and Their Applications},
+  pages        = {241--243},
+  year         = {2021},
+  isbn         = {978-2-9557050-5-6},
 }
-```
 
 ## 1. Data
 

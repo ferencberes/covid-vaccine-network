@@ -25,6 +25,7 @@ pip install -r requirements.txt
 
 If you use our code or the Twitter data set that we collected on Covid vaccination, please cite paper:
 
+```
 @conference{béres2021vaccine,
   author       = {Ferenc Béres and Rita Csoma and Tamás Vilmos Michaletzky and András A. Benczúr}, 
   title        = {Vaccine skepticism detection by network embedding},
@@ -33,6 +34,7 @@ If you use our code or the Twitter data set that we collected on Covid vaccinati
   year         = {2021},
   isbn         = {978-2-9557050-5-6},
 }
+```
 
 ## 1. Data
 

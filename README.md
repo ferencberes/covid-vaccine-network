@@ -10,7 +10,7 @@
 
 In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection techniques. 
 
-Our work was published at 10th International Conference on Complex Networks and Their Applications.
+Our work was published at the 10th International Conference on Complex Networks and Their Applications.
 
 # Requirements
 

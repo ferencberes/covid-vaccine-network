@@ -1,45 +1,34 @@
-name: CI
+name: Testing installation and codebase using Anaconda
 
-on:
-
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-  workflow_dispatch:
+on: [push]
 
 jobs:
-    build:
-      runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [ubuntu-18.04, ubuntu-latest]
-          python-version: ['3.7','3.8','3.9']
-      steps:
-      - uses: actions/checkout@v2
-      - name: Setup conda
-        uses: s-weigand/setup-conda@v1
-        with:
-          update-conda: true
-          python-version: ${{ matrix.python-version }}
-          conda-channels: anaconda, conda-forge
-      - run: conda --version
-      - run: which python
-      - name: "Run installation"
-        run: |
-         pip install -r requirements.txt
-      - name: "Download data"
-        run: |
-         ./scripts/download_data.sh
-      - name: "Run tests"
-        run: |
-         pytest --cov=./
-      - name: "Upload coverage to Codecov"
-        run:
-         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
-      - name: "Node embedding"
-        run: |
-         python ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 2 --rows 10000
-         python ./scripts/node_embedding.py fit 2core_10000.csv --model NetMF
-         wc -l NetMF*.csv
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: "Install dependencies"
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        $CONDA/bin/conda env update --file env.yml --name base
+    - name: "Test with pytest"
+      run: |
+        $CONDA/bin/pytest --cov --cov-report xml:coverage.xml --ignore install
+    - name: "Upload code coverage"
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov 
+        ./codecov -t "$CODECOV_TOKEN"
+    - name: "Download data"
+      run: |
+        bash ./scripts/download_data.sh
+        pushd data/public_data_2022-10-27
+        head Pro-vaxxer_results/parameters.json
+        popd

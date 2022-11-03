@@ -1,14 +1,12 @@
-import sys, os, shutil
+import sys, os
 import pandas as pd
 import networkx as nx
-script_path = os.path.realpath(__file__)
-script_dir = os.path.split(script_path)[0]
-sys.path.insert(0, '%s/../python' % script_dir)
-sys.path.insert(0, '%s/../scripts' % script_dir)
-from graph_utils import get_user_graph, fit_embedding, EMBEDDINGS
+sys.path.insert(0, '%s/scripts' % os.getcwd())
+sys.path.insert(0, '%s/python' % os.getcwd())
+from graph_utils import *
 from node_embedding import preprocess, fit
 
-data_dir = "%s/sample_data" % script_dir
+data_dir = "%s/tests/sample_data" % os.getcwd()
 replies_fp = os.path.join(data_dir, "seed_preprocessed", "valid_threads.csv")
 replies_df = pd.read_csv(replies_fp)
 
@@ -29,11 +27,15 @@ def test_generate_embedding():
     assert emb_df.shape[1] == 10
     
 def test_all_embeddings():
-    preproc_graph_path = preprocess(replies_fp, 1)
+    preproc_graph_path = preprocess(data_dir, 1)
     for model in ["DeepWalk","NetMF","RandNE","SymmNMF","LaplacianEigenmaps","BigClam"]:
         output_fp, emb_df = fit(preproc_graph_path, model, 3)
         os.remove(output_fp)
         print(model)
         assert emb_df.shape[0] == 5
         assert emb_df.shape[1] == 3
-            
+        
+def test_calculate_centrality():
+    graph_file = preprocess(data_dir, 1)
+    centrality_file = calculate_network_centrality(graph_file)
+    assert os.path.exists(centrality_file)

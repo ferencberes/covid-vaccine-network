@@ -1,138 +1,117 @@
-import sys, os, shutil
-script_path = os.path.realpath(__file__)
-script_dir = os.path.split(script_path)[0]
-sys.path.insert(0, '%s/../python' % script_dir)
-from vaxxer.models import VaxxerModel, VaxxerClassifier
+import sys, os, shutil, pytest
+from datetime import datetime
+sys.path.insert(0, '%s/scripts' % os.getcwd())
+sys.path.insert(0, '%s/python' % os.getcwd())
+from vaxxer.features import *
+from vaxxer.generator import FeatureGenerator
+from vaxxer.bert_utils import BERTS
+from vaxxer.generator import FeatureGenerator
+from vaxxer.classifier import VaxxerClassifier
+from node_embedding import preprocess
+from graph_utils import calculate_network_centrality
 
-data_dir = "%s/sample_data" % script_dir
+data_dir = "%s/tests/sample_data" % os.getcwd()
 seed_fp = os.path.join(data_dir, "seed_preprocessed", "valid_thread_seeds.csv")
-model_dir = os.path.join(data_dir, "seed_labeled")
-comet_key = None
-node_emb_dir=None
+label_fp = os.path.join(data_dir, "seed_labeled", "labeled_tweets.csv")
+output_dir = os.path.join(data_dir, "components")
+model_id = "Vax-skeptic_diFalse_tr0.70"
 
-### text models ###
+### generate components ###
 
-def test_text_tfidf():
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1)
+def test_generate_bert():
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    component = BertComponent(generator.tr_meta, generator.te_meta, generator.tr_text, generator.te_text, 'ans/vaccinating-covid-tweets', 120, False, False, normalize=False)
+    component.preprocess()
+    generator.generate(component, {})
+    assert "Labels" in os.listdir(os.path.join(output_dir, model_id))
+    assert "Bert" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:False_lemmatize:False_model:ans@vaccinating-covid-tweets_mtlen:120_stem:False" in os.listdir(os.path.join(output_dir, model_id, "Bert"))
+
+def test_generate_tfidf():
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    component = TfIdfComponent(generator.tr_meta, generator.te_meta, generator.tr_text, generator.te_text, True, True, False, normalize=True)
+    component.preprocess()
+    generator.generate(component, {"dimension":100})
+    assert "TfIdf" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:True_dimension:100_lemmatize:True_stem:True" in os.listdir(os.path.join(output_dir, model_id, "TfIdf"))
+
+def test_generate_history():
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    component = UserHistory(generator.tr_meta, generator.te_meta, generator.tr_text, generator.te_text, normalize=True)
+    component.preprocess()
+    generator.generate(component, {"user_history":True})
+    assert "History" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:True" in os.listdir(os.path.join(output_dir, model_id, "History"))
+
+def test_generate_history_without_preprocess():
+    with pytest.raises(RuntimeError):
+        generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+        component = UserHistory(generator.tr_meta, generator.te_meta, generator.tr_text, generator.te_text, normalize=True)
+        # preprocess funciton is not called to raise RuntimeError
+        generator.generate(component, {"user_history":True})
+
+def test_generate_twitter():
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    component = UserTwitter(generator.tr_meta, generator.te_meta, normalize=True)
+    component.preprocess()
+    generator.generate(component, {"user_twitter":True})
+    assert "Twitter" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:True" in os.listdir(os.path.join(output_dir, model_id, "Twitter"))
+
+def test_generate_centrality():
+    graph_file = preprocess(data_dir, 1)
+    centrality_file = calculate_network_centrality(graph_file)
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    component = UserCentrality(generator.tr_meta, generator.te_meta, centrality_file, normalize=True)
+    component.preprocess()
+    generator.generate(component, {"user_centrality":True})
+    assert "Centrality" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:True" in os.listdir(os.path.join(output_dir, model_id, "Centrality"))
+
+def test_generate_node_embedding():
+    generator = FeatureGenerator(seed_fp, label_fp, output_dir, "Vax-skeptic", False)
+    node_emb_dir = os.path.join(data_dir, "node_embeddings")
+    component = NodeEmbedding(generator.tr_meta, generator.te_meta, node_emb_dir, ["Walklets.csv"], normalize=True)
+    component.preprocess()
+    generator.generate(component, {"user_ne":"Walklets.csv"})
+    assert "Network" in os.listdir(os.path.join(output_dir, model_id))
+    assert "norm:True_user_ne:Walklets.csv" in os.listdir(os.path.join(output_dir, model_id, "Network"))
+    
+### train classifier ###
+
+def test_classifier():
+    feature_dir = os.path.join(output_dir, model_id)
+    clf = VaxxerClassifier(feature_dir, "lstm", None, None)
+    clf.set_components([], [".ipynb_checkpoints"])
+    clf.load_components()
+    # define search space
     parameters = [
-        ("model", "fixed", 'newton-cg'),
-        ("dimension", "choice", [2,3]),
-        ("use_svd", "choice", [True,False])
+        ("epochs", "fixed", 5),
+        ("batches", "fixed", 256),
+        ("dropout", "fixed", 0.1),
+        ("inter_dim", "fixed", 128),
+        ("lr_rate", "fixed", 0.001),
+        ("mode", "fixed", "inter"),
+        ("scheduler", "fixed", "constant")
     ]
-    best_config = model.tune_parameters(parameters, "GRID", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
-    assert "dimension" in best_config and "use_svd" in best_config and not "model" in best_config and len(model.components) == 1
+    experiment_folder = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    export_dir = os.path.join(output_dir, experiment_folder)
+    best_config = clf.tune(parameters, "GRID", 1, export_dir=export_dir)
+    assert len(best_config) > 0
+    assert experiment_folder in os.listdir(output_dir)
     
-def test_text_word2vec():
-    model = VaxxerModel(seed_fp, model_dir, "word2vec", "Vax-skeptic", False, comet_key, workers=1)
-    parameters = [
-        ("model", "fixed", 'newton-cg'),
-        ("dimension", "fixed", 10),
-        ("window", "fixed", 3),
-        ("min_count", "fixed", 1),
-        ("epochs", "int", [1,3]),
-    ]
-    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
-    assert "epochs" in best_config and not "dimension" in best_config and len(model.components) == 1
+def test_classifier_no_text_feature():
+    with pytest.raises(RuntimeError):
+        feature_dir = os.path.join(output_dir, model_id)
+        for folder_name in ["TfIdf","Bert"]:
+            text_dir = os.path.join(feature_dir, folder_name)
+            if os.path.exists(text_dir):
+                shutil.rmtree(text_dir)
+        clf = VaxxerClassifier(feature_dir, "lstm", None, None)
+        clf.load_components()
 
-def test_text_doc2vec():
-    model = VaxxerModel(seed_fp, model_dir, "doc2vec", "Vax-skeptic", True, comet_key, workers=1)
-    parameters = [
-        ("model", "fixed", 'newton-cg'),
-        ("dimension", "fixed", 10),
-        ("window", "fixed", 3),
-        ("min_count", "fixed", 1),
-        ("epochs", "int", [1,3]), 
-    ]
-    best_config = model.tune_parameters(parameters, "TPE", num_trials=10, metric="auc", direction="maximize", train_ratio=0.5)
-    assert "epochs" in best_config and not "dimension" in best_config and len(model.components) == 1
-    
-### models with user statistics ###
-
-def test_user_history():
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_history":True,
-    }
-    X_train, X_test = model.get_train_test_embeddings(config, train_ratio=0.5)
-    print(X_train.shape)
-    assert len(model.components) == 2 and X_train.shape[1] == 9
-
-def test_user_twitter():
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_twitter":True,
-    }
-    X_train, X_test = model.get_train_test_embeddings(config, train_ratio=0.5)
-    print(X_train.shape)
-    assert len(model.components) == 2 and X_train.shape[1] == 9
-    
-def test_concatenation():
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_history":True,
-        "user_twitter":True,
-    }
-    X_train, X_test = model.get_train_test_embeddings(config, train_ratio=0.5)
-    print(X_train.shape)
-    assert len(model.components) == 3 and X_train.shape[1] == 13
-    
-### models with node embedding ###
-
-def test_node_embedding():
-    emb_dir = os.path.join(data_dir, "node_embeddings")
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1, node_emb_dir=emb_dir)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_history":True,
-        "user_twitter":True,
-        "user_ne":"Walklets.csv",
-    }
-    X_train, X_test = model.get_train_test_embeddings(config, train_ratio=0.5)
-    print(X_train.shape)
-    assert len(model.components) == 4 and X_train.shape[1] == (128+13)
-
-### other model functionalities
-    
-def test_export_load_predict():
-    emb_dir = os.path.join(data_dir, "node_embeddings")
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1, node_emb_dir=emb_dir)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_history":True,
-        "user_ne":"Walklets.csv",
-    }
-    output_dir = model.export(os.path.join(data_dir, "exported_data"), config, train_ratio=0.5)
-    # load exported data with classifier
-    classifier = VaxxerClassifier("tfidf", "Vax-skeptic", True)
-    X_train, _ = classifier.load(output_dir, use_text=True, use_history=False, use_network=False)
-    assert X_train.shape[1] == 5
-    X_train, _ = classifier.load(output_dir, use_text=True, use_history=True, use_network=False)
-    assert X_train.shape[1] == 9
-    X_train, X_test = classifier.load(output_dir, use_text=True, use_history=True, use_network=True)
-    assert X_train.shape[1] == (9+128)
-    model, tr_pred, te_pred = classifier.fit_vaxxer_classifier(X_train, X_test, config)
-    assert model.solver == "newton-cg"
-    
-def test_deploy():
-    deploy_dir = os.path.join(data_dir, "seed_labeled", "predictions")
-    if os.path.exists(deploy_dir):
-        shutil.rmtree(deploy_dir)
-    emb_dir = os.path.join(data_dir, "node_embeddings")
-    model = VaxxerModel(seed_fp, model_dir, "tfidf", "Vax-skeptic", True, comet_key, workers=1, node_emb_dir=emb_dir)
-    config = {
-        "model":'newton-cg',
-        "dimension":5,
-        "user_history":True,
-        "user_twitter":True,
-        "user_ne":"Walklets.csv",
-    }
-    model.deploy(config)
-    assert os.path.exists(deploy_dir)
+def test_classifier_no_components():
+    with pytest.raises(RuntimeError):
+        shutil.rmtree(output_dir)
+        feature_dir = os.path.join(output_dir, model_id)
+        clf = VaxxerClassifier(feature_dir, "lstm", None, None)

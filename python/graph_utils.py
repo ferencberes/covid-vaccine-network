@@ -7,7 +7,7 @@ import time
 # Graph preprocessing
 #####################
 
-def create_graph_from_df(df, src_col, trg_col):
+def create_graph_from_df(df: pd.DataFrame, src_col: str, trg_col: str):
     edges = list(zip(df[src_col],df[trg_col]))
     # filter out duplicates
     edges = list(set(edges))
@@ -22,7 +22,7 @@ def connected_component(G):
     C = max(nx.connected_components(G), key=len)
     return G.subgraph(C).copy()
 
-def get_user_graph(reply_df, n_conn, last_date_str=None, src_col="usr_id_str", trg_col="in_reply_to_user_id_str", remove_loops=True):
+def get_user_graph(reply_df: pd.DataFrame, n_conn: int, last_date_str: str=None, src_col: str="usr_id_str", trg_col: str="in_reply_to_user_id_str", remove_loops: bool=True, lcc_only=True):
     df = reply_df.copy()
     # excluding seed tweets
     df = df[~df[trg_col].isnull()]
@@ -41,11 +41,13 @@ def get_user_graph(reply_df, n_conn, last_date_str=None, src_col="usr_id_str", t
     N = graph.number_of_nodes()
     print("Original graph:", nx.info(graph))
     # keeping only the nodes with at least n connections
-    graph = graph_min_degree(graph, n_conn=n_conn)
-    print("Graph after degree filter:", nx.info(graph))
+    if n_conn > 1:
+        graph = graph_min_degree(graph, n_conn=n_conn)
+        print("Graph after degree filter:", nx.info(graph))
     # choosing the largest connected component
-    graph = connected_component(graph)
-    print("Largest connected component:", nx.info(graph))
+    if lcc_only:
+        graph = connected_component(graph)
+        print("Largest connected component:", nx.info(graph))
     print("Kept node ratio: %.2f" % (graph.number_of_nodes()/N))
     return graph
 
@@ -53,7 +55,7 @@ def get_user_graph(reply_df, n_conn, last_date_str=None, src_col="usr_id_str", t
 # Node embeddings
 #####################
 
-def relabeled_nodes_labels(g):
+def relabeled_nodes_labels(g: nx.Graph):
     # relabeling the nodes from 0 accordingly
     mapping = dict(zip(g, range(g.number_of_nodes())))
     g = nx.relabel_nodes(g, mapping)
@@ -87,7 +89,7 @@ EMBEDDINGS = [
     'GEMSEC'
 ]
 
-def karate_factory(algo, dim=128, nwalks=10, workers=4):
+def karate_factory(algo: str, dim: int=128, nwalks: int=10, workers: int=4):
     if algo == "Walklets":
         karate_obj = Walklets(dimensions=int(dim/4), walk_number=nwalks, workers=workers)
     elif algo == "Role2Vec":
@@ -134,7 +136,7 @@ def karate_factory(algo, dim=128, nwalks=10, workers=4):
         raise RuntimeError("Invalid model type: %s" % algo)
     return karate_obj
 
-def fit_embedding(embedding_id, G, dimension):
+def fit_embedding(embedding_id: str, G: nx.Graph, dimension: int):
     print(nx.info(G))
     # renumbering the graph, and saving the numbers and mapping
     relabeled_graph, mapping = relabeled_nodes_labels(G)
@@ -154,3 +156,25 @@ def fit_embedding(embedding_id, G, dimension):
     user_ids = [str(int(i)) for i in user_ids]
     embedding_df = pd.DataFrame(data=node_embedding_vectors, index=user_ids)
     return embedding_df, embedding_time
+
+### Network centrality ###
+
+def calculate_network_centrality(graph_file: str, src_col: str="usr_id_str", trg_col: str="in_reply_to_user_id_str",):
+    edges_df = pd.read_csv(graph_file)
+    G = nx.from_pandas_edgelist(edges_df, source=src_col, target=trg_col, create_using=nx.DiGraph)
+    print("Nodes:", G.number_of_nodes(), "Edges:", G.number_of_edges())
+    indeg_c = nx.in_degree_centrality(G)
+    outdeg_c = nx.out_degree_centrality(G)
+    kcore = nx.core_number(G)
+    pr = nx.pagerank(G, max_iter=50)
+    centralities = {
+        "indeg":indeg_c,
+        "outdeg":outdeg_c,
+        "kcore":kcore,
+        "pagerank":pr
+    }
+    centrality_df = pd.DataFrame(centralities)
+    centrality_df = centrality_df.reset_index().rename({"index":src_col}, axis=1)
+    centrality_file = graph_file.replace(".csv","_centrality.csv")
+    centrality_df.to_csv(centrality_file, index=False)
+    return centrality_file

@@ -1,12 +1,16 @@
-import re, unicodedata, contractions, emoji, inflect, nltk
+import re, unicodedata, contractions, emoji, inflect
+import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('omw-1.4')
+nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
 import numpy as np
 
 ### noise removal ###
+
 def to_lowercase(words):
     """Convert all characters to lowercase from list of tokenized words"""
     new_words = []
@@ -86,48 +90,8 @@ def remove_stopwords(words):
             new_words.append(word)
     return new_words
 
-### full text preprocessing ###
+### stemming ###
 
-def extract_emojis(text):
-    demojized_text = emoji.demojize(text, delimiters=(" em_", " "))
-    raw_emojis = []
-    for emoji_dict in emoji.emoji_lis(text):
-        raw_emojis.append(emoji_dict['emoji'])
-    return raw_emojis
-
-def denoise_text(text, emojis=True):
-    """Denoise text by removing urls, hashtags, @-mentions and emojis."""
-    text = remove_urls(text)
-    text = remove_hashtags(text)
-    text = remove_mentions(text)
-    text = replace_and_sign(text)
-    text = replace_contractions(text)
-    if emojis:
-        text = replace_emojis(text)
-    return text
-
-def normalize(words):
-    """Normalize text by removing special characters, punctuations, stopwords and replacing numbers with text. The normalized text is further converted to lowercase."""
-    words = remove_non_ascii(words)
-    words = remove_punctuation(words)
-    words = replace_numbers(words)
-    words = to_lowercase(words)
-    words = remove_stopwords(words)
-    return words
-
-def tokenize_text(text):
-    """Tokenize text"""
-    token_list = word_tokenize(text)
-    return token_list
-
-def text_preprocessing(text: str):
-    """Text preprocessing pipeline: denoising, tokenization, normalization."""
-    text = denoise_text(text)
-    word_list = tokenize_text(text)
-    word_list = normalize(word_list)
-    return word_list
-
-### additional functionality ###
 def stem_words(words):
     """Stem words in list of tokenized words"""
     stemmer = LancasterStemmer()
@@ -146,11 +110,64 @@ def lemmatize_verbs(words):
         lemmas.append(lemma)
     return lemmas
 
-def stem_and_lemmatize(words):
-    """Stem and lemmatize words"""
-    stems = stem_words(words)
-    lemmas = lemmatize_verbs(words)
-    return stems, lemmas
+### full text preprocessing pipelines ###
+
+def tokenize_text(text):
+    """Tokenize text"""
+    token_list = word_tokenize(text)
+    return token_list
+
+def denoise_text(text, keep_emojis=True):
+    """Denoise text by removing (or cleaning) urls, hashtags, @-mentions and emojis."""
+    text = remove_urls(text)
+    text = remove_hashtags(text)
+    text = remove_mentions(text)
+    text = replace_and_sign(text)
+    text = replace_contractions(text)
+    if keep_emojis:
+        text = replace_emojis(text)
+    return text
+
+def normalize(words, lowercase=True, stopwords=True):
+    """Normalize text by removing special characters, punctuations, stopwords and replacing numbers with text. The normalized text is further converted to lowercase."""
+    words = remove_non_ascii(words)
+    words = remove_punctuation(words)
+    words = replace_numbers(words)
+    if lowercase:
+        words = to_lowercase(words)
+    if stopwords:
+        words = remove_stopwords(words)
+    return words
+
+def text_preprocessing(text: str, stem=False, lemmatize=False, only_emoji=False, lowercase=True, stopwords=True):
+    """Text preprocessing pipeline: denoising, tokenization, normalization."""
+    text = denoise_text(text)
+    word_list = tokenize_text(text)
+    word_list = normalize(word_list, lowercase, stopwords)
+    if only_emoji:
+        word_list = [word for word in word_list if word.startswith("em_")]
+    else:
+        if stem:
+            word_list = stem_words(word_list)
+        if lemmatize:
+            word_list = lemmatize_verbs(word_list)
+    return word_list
+
+def preprocess_sentences(sentences, stem=False, lemmatize=False, only_emoji=False, lowercase=True, stopwords=True, tokenized_output=False):
+    """Sentence preprocessing pipeline. Normal or tokenized text is returned."""
+    preprocessed_data = []
+    for sentence in sentences:
+        sent = text_preprocessing(sentence, stem, lemmatize, only_emoji, lowercase, stopwords)
+        if tokenized_output:
+            preprocessed_data.append(sent)
+        else:
+            if len(sent) > 0:
+                preprocessed_data.append(' '.join(sent))
+            else:
+                preprocessed_data.append('')
+    return preprocessed_data
+
+### additional functionality ###
 
 def w2v_infer_vector(model, sentence):
     """Infer sentence embedding for gensim.Word2Vec model."""
@@ -159,19 +176,3 @@ def w2v_infer_vector(model, sentence):
         return np.mean(model.wv[keys], axis=0)
     else:
         return np.zeros(model.vector_size)
-
-### preprocessing for multiple sentences ###
-
-def preprocessing_tfidf(sentences):
-    """Sentence preprocessing pipeline for TF-IDF. Normal text is returned."""
-    preprocessed_data = []
-    for sentence in sentences:
-        preprocessed_data.append(' '.join(text_preprocessing(sentence)))
-    return preprocessed_data
-
-def preprocessing_document_list(sentences):
-    """Sentence preprocessing pipeline for 'gensim'. Tokenized text is returned."""
-    tokenized_data = []
-    for sentence in sentences:
-        tokenized_data.append(text_preprocessing(sentence))
-    return tokenized_data

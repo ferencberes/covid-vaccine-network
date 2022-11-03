@@ -1,9 +1,13 @@
 #!/bin/bash
 mkdir -p data
 cd data
-#download train-test representations
-wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/covid_vaxxer_representations_2021-09-24.zip
-unzip covid_vaxxer_representations_2021-09-24.zip
-#download raw Twitter data identifiers
-wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/tweet_ids_2021-11-18.zip
-unzip tweet_ids_2021-11-18.zip
+wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/public_data_2022-10-27.zip
+unzip public_data_2022-10-27.zip
+cd public_data_2022-10-27
+for folder in "Pro-vaxxer_results" "Vax-skeptic_results"
+do
+mkdir $folder;
+pushd $folder;
+wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/parameters.json
+popd
+done

@@ -60,16 +60,6 @@ We provide a [bash script](scripts/download_data.sh) (`download_data.sh`) to dow
 
 The feature components are downloaded and decompressed into the `data` subfolder.
 
-### How to generate feature components from raw data? (TODO)
-
-If you download the raw data from Twitter using the Tweet identifiers in our publicly shared dataset, then use the following [script](scripts/generate_components_all.sh) to generate feature components from raw data:
-
-```bash
-cd scripts
-bash generate_components_all.sh TODO Vax-skeptic
-bash generate_components_all.sh TODO Pro-vaxxer
-```
-
 ## 2. Experiments
 
 We prepared a [script](scripts/train_eval_models.sh) to train and evaluate the models for every experiment.

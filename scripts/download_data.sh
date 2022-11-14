@@ -1,6 +1,11 @@
 #!/bin/bash
 mkdir -p data
 cd data
+# download tweet IDs
+wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/tweet_ids_2022-11-14.zip
+unzip tweet_ids_2022-11-14.zip
+cd tweet_ids_2022-11-14
+# download prepared feature components
 wget http://info.ilab.sztaki.hu/~fberes/covid_vaccine_data/public_data_2022-10-27.zip
 unzip public_data_2022-10-27.zip
 cd public_data_2022-10-27

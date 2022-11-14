@@ -11,10 +11,13 @@ Our work was published at the 10th International Conference on Complex Networks 
 - UNIX environment
 - Create a new conda environment with the related Python dependencies using the provided [YAML file](env.yml). 
 - Activate the new conda environment **(covid\_vax\_network)**
+- Install additional dependencies for downloading Twitter data
 
 ```bash
 conda env create -f env.yml
 conda activate covid_vax_network
+cd install
+bash install_twittercrawler.sh
 ```
 
 # Tests
@@ -58,16 +61,25 @@ We provide a [bash script](scripts/download_data.sh) (`download_data.sh`) to dow
 ./scripts/download_data.sh
 ```
 
-The feature components are downloaded and decompressed into the `data` subfolder.
+The feature components (`public_data_2022-10-27`) are downloaded and decompressed into the `data` subfolder.
 
-### How to generate feature components from raw data? (TODO)
+### How to generate feature components from raw data?
 
-If you download the raw data from Twitter using the Tweet identifiers in our publicly shared dataset, then use the following [script](scripts/generate_components_all.sh) to generate feature components from raw data:
+By executing the former [bash script](scripts/download_data.sh) (`download_data.sh`), the files containing Tweet identifiers are also downloaded (`tweet_ids_2022-11-14`) into the `data` subfolder.
+
+We provide a script example for downloading original Tweet data using the provided Tweet identifiers:
+```bash
+cd scripts
+python download_tweets_by_id.py <PATH_TO_API_KEY_FILE> ../data/tweet_ids_2022-11-14/seed_preprocessed/seed_tweet_ids.txt ../data/tweet_ids_2022-11-14/seed_preprocessed/valid_thread_seeds.txt 50000
+```
+where you must specify your Twitter API credentials as described [here](https://github.com/ferencberes/twitter-crawler#b-json-configuration-file).
+
+If you have successfully downloaded the raw Twitter data, then use the following [script](scripts/download_tweets_by_id.py) to generate feature components from raw data:
 
 ```bash
 cd scripts
-bash generate_components_all.sh TODO Vax-skeptic
-bash generate_components_all.sh TODO Pro-vaxxer
+bash generate_components_all.sh ../data/tweet_ids_2022-11-14 Vax-skeptic
+bash generate_components_all.sh ../data/tweet_ids_2022-11-14 Pro-vaxxer
 ```
 
 ## 2. Experiments
@@ -106,7 +118,7 @@ We provide a script to train your own node embedding model on the Twitter reply 
 
 First, you need to preprocess the network. For example, in the command below we only use the first 100K edges and exclude nodes with less than 5 connections:
 ```bash
-python ./scripts/node_embedding.py preprocess ./data/tweet_ids/reply_network.txt --con 3 --rows 100000
+python ./scripts/node_embedding.py preprocess ./data/tweet_ids_2022-11-14/seed_preprocessed/reply_network.txt --con 3 --rows 100000
 ```
 
 Next, train a node embedding model (e.g. DeepWalk) on the preprocessed network. The input file (3core_100000.csv) was created in the previous step.
@@ -130,8 +142,3 @@ These user representations can be fed to the vaccine view classifier. However, t
 # Acknowledgements
 
 Support by the the European Union project RRF-2.3.1-21-2022-00004 within the framework of the Artificial Intelligence National Laboratory
-
-# What is coming to this repository?
-
-- Scripts to donwload raw data from Twitter based on the provided Tweet identifiers
-- Documentation to generate feature components from raw data

@@ -43,7 +43,7 @@ pytest --cov
 If you use our code or the Twitter data set that we collected on Covid vaccination, please cite our paper:
 
 ```
-@conference{béres2023network,
+@Article{béres2023network,
   author={Ferenc Béres and Tamás Vilmos Michaletzky and Rita Csoma and András A. Benczúr}, 
   title={Network embedding aided vaccine skepticism detection},
   journal="Applied Network Science",

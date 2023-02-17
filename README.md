@@ -44,8 +44,8 @@ If you use our code or the Twitter data set that we collected on Covid vaccinati
 
 ```
 @conference{béres2023network,
-  author       = {Ferenc Béres and Tamás Vilmos Michaletzky and Rita Csoma and András A. Benczúr}, 
-  title        = {Network embedding aided vaccine skepticism detection},
+  author={Ferenc Béres and Tamás Vilmos Michaletzky and Rita Csoma and András A. Benczúr}, 
+  title={Network embedding aided vaccine skepticism detection},
   journal="Applied Network Science",
   year="2023",
   volume="8",

@@ -5,6 +5,7 @@ from tqdm import tqdm
 from datetime import datetime as dt
 from optuna.samplers import TPESampler, RandomSampler, GridSampler
 from sklearn.linear_model import LogisticRegression
+from sklearn.utils import resample
 from transformers import logging
 logging.set_verbosity_error()
 
@@ -194,6 +195,7 @@ class VaxxerClassifier():
             print(X_train.shape, X_test.shape)
         else:
             X_train, X_test = None, None
+        sample_seed = config.get("sample_seed", None)
         if self._embedding_type == "bert":
             train_ids, train_mask, test_ids, test_mask, cols = self.components["Bert"][config["Bert"]]
             y_tr = torch.Tensor(self.tr_label).long()
@@ -208,11 +210,23 @@ class VaxxerClassifier():
             if len(tr_parts) > 0:
                 z_tr = torch.Tensor(X_train)
                 z_te = torch.Tensor(X_test)
+                if sample_seed != None:
+                    train_ids, train_mask, z_tr, y_tr = resample(train_ids, train_mask, z_tr, y_tr, replace=True, random_state=sample_seed, stratify=y_tr)
+                    test_ids, test_mask, z_te, y_te = resample(test_ids, test_mask, z_te, y_te, replace=True, random_state=sample_seed, stratify=y_te)
                 X_train = TensorDataset(train_ids, train_mask, z_tr, y_tr)
                 X_test = TensorDataset(test_ids, test_mask, z_te, y_te)
             else:
+                if sample_seed != None:
+                    train_ids, train_mask, y_tr = resample(train_ids, train_mask, y_tr, replace=True, random_state=sample_seed, stratify=y_tr)
+                    test_ids, test_mask, y_te = resample(test_ids, test_mask, y_te, replace=True, random_state=sample_seed, stratify=y_te)
                 X_train = TensorDataset(train_ids, train_mask, y_tr)
                 X_test = TensorDataset(test_ids, test_mask, y_te)
+            #print(y_tr[:20], y_tr.sum())
+            #print(y_te[:20], y_te.sum())
+        else:
+            if sample_seed != None:
+                X_train, self.tr_label = resample(X_train, self.tr_label, replace=True, random_state=sample_seed, stratify=y_tr)
+                X_test, self.te_label = resample(X_test, self.te_label, replace=True, random_state=sample_seed, stratify=y_te)
         return X_train, X_test, all_columns
            
     def _run_single_config(self, config: dict, return_probas=False, show_conf_mx=False, verbose=False):

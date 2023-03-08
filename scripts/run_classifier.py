@@ -24,6 +24,8 @@ parser.add_argument("--experiment_folder", type=str, default=None, help="Specify
 parser.add_argument("--comet_file", type=str, default="None", help="Specify file path containing comet.ml API_KEY")
 parser.add_argument("--comet_workspace", type=str, default="covid-vaccine", help="Specify Comet ML workspace name")
 parser.add_argument("--comet_project", type=str, default="model-performance-revision", help="Specify Comet ML project name")
+#parser.add_argument("--comet_project", type=str, default="model-performance-significance", help="Specify Comet ML project name")
+parser.add_argument("--random_sample", action="store_true", help="Turn on to run models for 100 random samples")
 
 args = parser.parse_args()
 
@@ -59,6 +61,9 @@ else:
     else:
         raise ValueError("Provide valid path for 'parameters.json' file!")
 print(export_dir)
+
+if args.random_sample:
+    parameters.append(("sample_seed","choice",list(range(100))))
 print(parameters)
 
 # tune parameters

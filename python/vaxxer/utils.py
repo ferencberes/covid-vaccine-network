@@ -336,7 +336,7 @@ def show_node_embedding_performance(network_auc_df, width=800, height=400):
     visu_df["History"] = visu_df["History"].replace({"None":"text + raw network", "norm:True":"text + user history + raw network"}) 
     fig = px.bar(visu_df, x="Network", y="mean", color="History", barmode='group', width=width, height=height)
     #fig.update_yaxes(range=[visu_df["mean"].min()-0.01, visu_df["mean"].max()+0.01])
-    fig.update_yaxes(range=[0.75, 0.9])
+    fig.update_yaxes(range=[0.7, 0.9])
     fig.update_layout(
         #title="Performance with respect to different node embeddings",
         yaxis_title="AUC",

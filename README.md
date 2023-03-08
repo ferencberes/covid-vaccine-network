@@ -1,4 +1,4 @@
-# Vaccine skepticism detection by network embedding
+# Network embedding aided vaccine skepticism detection
 
 [![Build](https://github.com/ferencberes/covid-vaccine-network/actions/workflows/main.yml/badge.svg)](https://github.com/ferencberes/covid-vaccine-network/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/ferencberes/covid-vaccine-network/branch/main/graph/badge.svg?token=B2D3JHO2K3)](https://codecov.io/gh/ferencberes/covid-vaccine-network)
@@ -7,7 +7,8 @@
 
 In this work, we intended to develop techniques that are able to efficiently differentiate between pro-vaxxer and vax-skeptic Twitter content related to COVID19 vaccines. After multiple data preprocessing steps, we evaluated Tweet content and user interaction network classification by combining text classifiers with several node embedding and community detection techniques. 
 
-Our work was published at the 10th International Conference on Complex Networks and Their Applications.
+Our initial results were published at the 10th International Conference on Complex Networks and Their Applications under the title **Vaccine skepticism detection by network embedding**.
+Our final work with additional findings and results was published in the Applied Network Science [journal](https://appliednetsci.springeropen.com/articles/10.1007/s41109-023-00534-x#citeas).
 
 # Requirements
 
@@ -42,13 +43,14 @@ pytest --cov
 If you use our code or the Twitter data set that we collected on Covid vaccination, please cite our paper:
 
 ```
-@conference{béres2021vaccine,
-  author       = {Ferenc Béres and Rita Csoma and Tamás Vilmos Michaletzky and András A. Benczúr}, 
-  title        = {Vaccine skepticism detection by network embedding},
-  booktitle    = {Book of Abstracts of the 10th International Conference on Complex Networks and Their Applications},
-  pages        = {241--243},
-  year         = {2021},
-  isbn         = {978-2-9557050-5-6},
+@Article{béres2023network,
+  author={Ferenc Béres and Tamás Vilmos Michaletzky and Rita Csoma and András A. Benczúr}, 
+  title={Network embedding aided vaccine skepticism detection},
+  journal="Applied Network Science",
+  year="2023",
+  volume="8",
+  number="11",
+  pages="21",
 }
 ```
 
@@ -144,4 +146,4 @@ These user representations can be fed to the vaccine view classifier. However, t
 
 # Acknowledgements
 
-Support by the the European Union project RRF-2.3.1-21-2022-00004 within the framework of the Artificial Intelligence National Laboratory
+Open access funding provided by ELKH Institute for Computer Science and Control. Support by the the European Union project RRF-2.3.1-21-2022-00004 within the framework of the Artificial Intelligence National Laboratory Grant no RRF-2.3.1-21-2022-00004.

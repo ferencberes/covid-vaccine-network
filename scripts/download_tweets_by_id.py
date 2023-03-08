@@ -10,14 +10,14 @@ if len(sys.argv) > 4:
     k = int(sys.argv[4])
 else:
     k = 10
-    
+
 # initialize Twitter API
 interactive = InteractiveCrawler()
 interactive.authenticate(twitter_api_key_path)
 
 # collect tweets by ID
 i = 0
-not_found = open("not_found.txt", 'w')
+not_found = open("not_found.txt", "w")
 writer = FileWriter(output_path)
 with open(seed_file_path) as fin:
     for line in fin:
@@ -43,4 +43,4 @@ results_df = results_df.drop_duplicates(subset=["id_str"])
 print(results_df.shape)
 
 # export tweets
-results_df.to_csv(output_path.replace(".txt",".csv"), index=False)
+results_df.to_csv(output_path.replace(".txt", ".csv"), index=False)

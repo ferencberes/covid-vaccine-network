@@ -12,7 +12,7 @@ Our work was published at the 10th International Conference on Complex Networks 
 # Requirements
 
 - UNIX environment
-- Create a new conda environment with the related Python dependencies using the provided [YAML file](env.yml). 
+- Create a new conda environment with the related Python (3.8) dependencies using the provided [YAML file](env.yml). 
 - Activate the new conda environment **(covid\_vax\_network)**
 - Install additional dependencies for downloading Twitter data
 

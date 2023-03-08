@@ -2,10 +2,11 @@ from comet_ml import Experiment
 import os, time
 import numpy as np
 
+
 def init_experiment(api_key, project, workspace):
     """Create comet.ml experiment based on provided or pipeline information."""
     # sleep for a few second to handle project creation cuncurrency
-    s = np.random.random()*5
+    s = np.random.random() * 5
     time.sleep(s)
     # create experiment
     experiment = Experiment(
@@ -16,7 +17,7 @@ def init_experiment(api_key, project, workspace):
         log_graph=False,
         auto_param_logging=False,
         auto_metric_logging=False,
-        auto_output_logging='default',
+        auto_output_logging="default",
         log_env_details=False,
         log_git_metadata=True,
         log_git_patch=False,
@@ -28,6 +29,7 @@ def init_experiment(api_key, project, workspace):
         auto_weight_logging=False,
     )
     return experiment
+
 
 def load_api_key(api_key_fp="../comet_key.txt"):
     """Load comet.ml api key from the provided file."""
